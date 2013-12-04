@@ -1,10 +1,10 @@
 import struct
 
 class TileMap(object):
-    def __init__(self, width, height):
+    def __init__(self, width, height, data=None):
         self.width = width
         self.height = height
-        self.data = [0 for i in range(width*height)]
+        self.data = [0 for i in range(width*height)] if data is None else data
 
     def save(self, path):
         fd = open(path, 'w')

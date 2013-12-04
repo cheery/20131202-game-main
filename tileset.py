@@ -9,7 +9,7 @@ class TileSet(object):
 
     def __iter__(self):
         self.load_on_demand()
-        return iter(self.tilefaces)
+        return iter(self.faces)
 
     def __getitem__(self, index):
         self.load_on_demand()
@@ -17,7 +17,7 @@ class TileSet(object):
 
     def __len__(self):
         self.load_on_demand()
-        return len(self.tilefaces)
+        return len(self.faces)
 
     def load_on_demand(self):
         if self.surface is not None:
