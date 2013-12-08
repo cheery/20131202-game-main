@@ -5,20 +5,61 @@ from tileset import TileSet
 from tilemap import TileMap
 from random import randint
 from level import Level
-from actor import Actor, Player, Enemy
+from actor import ActorDescriptor, Actor
+import sprite
+
+comp = sprite.Animation(sprite.load('graphics/computer.qml'), 'idle')
+
+player_anim = sprite.Animation(sprite.load('graphics/player.qml'), 'runleft')
 
 level = Level(
     tileset = TileSet('graphics/level.png', 16, 16),
     tilemap = TileMap(256, 256),
+    actors  = [],
 )
 
-player = Player(level, 10, 10)
+player_desc = ActorDescriptor(
+    'player',
+    sprite.load('graphics/player.qml'),
+    ('rundown', 0, 0.0),
+)
+
+@player_desc.behavior
+def player_game_frame(this):
+    anim = this.anim
+    control_x = this.axis_x
+    control_y = this.axis_y
+    if control_x > 0:
+        anim.state = 'runright'
+        anim.speed = 2.0 * 0.7
+    elif control_x < 0:
+        anim.state = 'runleft'
+        anim.speed = 2.0 * 0.7
+    elif control_y > 0:
+        anim.state = 'rundown'
+        anim.speed = 2.0 * 0.7
+    elif control_y < 0:
+        anim.state = 'runup'
+        anim.speed = 2.0 * 0.7
+    else:
+        anim.speed = 0.0
+    length = sqrt(control_x*control_x + control_y*control_y)
+    if length > 0.0:
+        control_x /= length
+        control_y /= length
+    x = int(round(this.x + control_x * 2))
+    y = int(round(this.y + control_y * 2))
+    this.move(x, y)
+
+player = player_desc(level, 10, 10)
+player.axis_x = 0
+player.axis_y = 0
 
 actors = [player]
-for i in range(200):
-    x = randint(4, level.tilemap.width*16 - 4)
-    y = randint(4, level.tilemap.height*16 - 4)
-    actors.append( Enemy(level, x,y) )
+#for i in range(200):
+#    x = randint(4, level.tilemap.width*16 - 4)
+#    y = randint(4, level.tilemap.height*16 - 4)
+#    actors.append( Enemy(level, x,y) )
 
 @frontend.hooks
 def init(screen):
@@ -48,8 +89,11 @@ def animation_frame(screen, now):
     for enemy in actors:
         enemy.paint(screen, now)
 
-    stamina = 10, 10, player.stamina+1, 10 
-    screen.fill((255, 255, 128), stamina)
+    comp.paint(screen, now, level.mapview.offset_x+16, level.mapview.offset_y+16)
+    player_anim.paint(screen, now, level.mapview.offset_x+16*10, level.mapview.offset_y+16*10)
+
+    #stamina = 10, 10, player.stamina+1, 10 
+    #screen.fill((255, 255, 128), stamina)
 
 @frontend.hooks
 def game_frame():

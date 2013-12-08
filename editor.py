@@ -12,6 +12,7 @@ import pygame
 level = Level(
     tileset = TileSet('graphics/level.png', 16, 16),
     tilemap = TileMap(256, 256),
+    actors  = [],
 )
 
 class Rectangle(object):
@@ -62,6 +63,9 @@ class TilePalette(object):
                     self.pencil.minor_tile = tile
 
 class Tool(object):
+    def motion(self, mouse):
+        pass
+
     def down(self, mouse, button):
         pass
 
@@ -212,8 +216,25 @@ def to_gridrect(first, second):
     height = 1 + max(y0, y1) - low_y
     return low_x, low_y, width, height
 
+class ActorDropper(Tool):
+    def __init__(self):
+        pass
 
-tools = [TilePencil(), GridSelection()]
+    def draw_to(self, screen):
+        mapview = level.mapview
+        tileset = mapview.tileset
+        mouse = frontend.mouse
+        screen.fill((255, 255, 0), (mouse.x-4, mouse.y-4, 8, 8))
+
+    def down(self, mouse, button):
+        x = mouse.x - level.mapview.offset_x
+        y = mouse.y - level.mapview.offset_y
+        if button == 1:
+            level.actors.append(Player(level, x, y))
+        if button == 2:
+            level.actors.append(Enemy(level, x, y))
+
+tools = [TilePencil(), GridSelection(), ActorDropper()]
 tool = tools[0]
 
 @frontend.hooks
@@ -230,6 +251,8 @@ def init(screen):
 def animation_frame(screen, now):
     screen.fill((0,0,0))
     level.mapview.draw_to(screen)
+    for actor in level.actors:
+        actor.paint(screen, now)
     tool.draw_to(screen)
 
 @frontend.hooks
@@ -260,5 +283,13 @@ def keydown(key, text):
         tool = tools[0]
     if key == K_2:
         tool = tools[1]
+    if key == K_3:
+        tool = tools[2]
+    if key == K_4:
+        tool = tools[3]
+    if key == K_5:
+        tool = tools[4]
+    if key == K_6:
+        tool = tools[5]
 
 frontend.run()

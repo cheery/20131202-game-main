@@ -4,9 +4,10 @@ def is_wall(tile):
     return tile != 0
 
 class Level(object):
-    def __init__(self, tileset, tilemap):
+    def __init__(self, tileset, tilemap, actors):
         self.tileset = tileset
         self.tilemap = tilemap
+        self.actors  = actors
         self.mapview = MapPainter(tileset, tilemap)
 
     def get_xy(self, x, y):
